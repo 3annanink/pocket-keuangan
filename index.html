@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pocket Expense Tracker</title>
+<meta name="description" content="A simple, private expense tracker that works offline. Your data stays on your device.">
+<meta name="theme-color" content="#fff4dc">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+:root{--bg:#fff4dc;--card:#fff;--ink:#1d1b3a;--mut:#5d5a78;--line:#1d1b3a;--sh:#1d1b3a;--red:#e0303a;--teal:#00857a;--yel:#ffc93c;--pur:#6c4cf1;--soft:#f6e9c9}
+:root[data-theme="dark"]{--bg:#14122b;--card:#22204a;--ink:#fff4dc;--mut:#b4b0d6;--line:#4a4690;--sh:#000;--soft:#2c2a5c}
+@media (prefers-color-scheme:dark){:root[data-theme="auto"]{--bg:#14122b;--card:#22204a;--ink:#fff4dc;--mut:#b4b0d6;--line:#4a4690;--sh:#000;--soft:#2c2a5c}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{min-height:100vh;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+#app{max-width:560px;margin:0 auto;padding:18px 16px 0}
+h1{font-size:26px;font-weight:900;letter-spacing:-.02em}
+h2{font-size:15px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:22px 0 10px}
+.top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.top h1 span{color:var(--red)}
+.card{background:var(--card);border:3px solid var(--line);border-radius:16px;box-shadow:5px 5px 0 var(--sh);padding:14px 16px}
+.mnav{display:flex;align-items:center;gap:8px}
+.mnav b{min-width:128px;text-align:center;font-size:16px}
+.ib{width:38px;height:38px;border-radius:50%;border:3px solid var(--line);background:var(--card);color:var(--ink);font-size:18px;font-weight:900;cursor:pointer}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.sum .card{padding:12px 14px}
+.sum .full{grid-column:1/-1}
+.lab{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.big{font-size:24px;font-weight:900;margin-top:2px;letter-spacing:-.02em;white-space:nowrap}
+.big.sm{font-size:19px}
+.inc{background:var(--teal);color:#fff}.exp{background:var(--red);color:#fff}.bal{background:var(--yel);color:#1d1b3a}
+.inc .lab,.exp .lab,.bal .lab{color:inherit;opacity:.85}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bar .r{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:4px;gap:8px}
+.track{height:14px;border:2.5px solid var(--line);border-radius:99px;background:var(--soft);overflow:hidden}
+.fill{height:100%;border-right:2.5px solid var(--line)}
+.list{display:flex;flex-direction:column;gap:10px}
+.tx{display:flex;align-items:center;gap:12px;padding:10px 12px;border:3px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer;width:100%;text-align:left;color:var(--ink);font:inherit}
+.dot{width:38px;height:38px;border-radius:50%;border:3px solid var(--line);flex:none;display:grid;place-items:center;font-weight:900;color:#fff;font-size:15px}
+.tx .m{flex:1;min-width:0}.tx .m b{display:block;font-size:15px}.tx .m small{display:block;color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx .a{font-weight:900;font-size:15px;white-space:nowrap}.a.p{color:var(--teal)}.a.n{color:var(--red)}
+.dg{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:12px 2px 2px}
+.chips{display:flex;gap:8px;margin:6px 0 4px;flex-wrap:wrap}
+.chip{border:3px solid var(--line);border-radius:99px;background:var(--card);color:var(--ink);padding:6px 14px;font-weight:800;font-size:13.5px;cursor:pointer}
+.chip.on{background:var(--yel);color:#1d1b3a}
+.empty{text-align:center;padding:26px 12px;color:var(--mut);font-weight:600}
+.empty b{display:block;font-size:17px;color:var(--ink);margin-bottom:4px}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:3px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:5}
+.tabs>div{width:100%;max-width:560px;display:grid;grid-template-columns:1fr 1fr 78px 1fr 1fr;align-items:end;gap:2px}
+.tab{background:none;border:0;color:var(--mut);font-weight:800;font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;font-family:inherit}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{color:var(--ink)}.tab.on svg{stroke:var(--red)}
+.fab{width:62px;height:62px;margin:0 auto 4px;border-radius:50%;border:3px solid var(--line);background:var(--red);color:#fff;font-size:34px;font-weight:700;line-height:1;box-shadow:4px 4px 0 var(--sh);cursor:pointer;display:grid;place-items:center}
+.ov{position:fixed;inset:0;background:rgba(20,18,43,.55);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:560px;border:3px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+.sheet h3{font-size:20px;font-weight:900;margin-bottom:12px}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:3px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.seg button{border:0;padding:10px;font-weight:900;font-size:15px;background:var(--card);color:var(--ink);cursor:pointer;font-family:inherit}
+.seg.three{grid-template-columns:1fr 1fr 1fr}.seg button.on.t{background:var(--yel);color:#1d1b3a}
+.seg button.on.e{background:var(--red);color:#fff}.seg button.on.i{background:var(--teal);color:#fff}
+label{display:block;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:10px 0 4px}
+input,select{width:100%;padding:12px;border:3px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;font-size:16px;font-weight:600}
+input.amt{font-size:28px;font-weight:900}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;margin-top:14px;padding:14px;border:3px solid var(--line);border-radius:14px;background:var(--pur);color:#fff;font:inherit;font-size:16px;font-weight:900;box-shadow:4px 4px 0 var(--sh);cursor:pointer}
+.btn.sec{background:var(--card);color:var(--ink);box-shadow:none;margin-top:10px}
+.btn.del{background:var(--card);color:var(--red);box-shadow:none;margin-top:10px}
+.btn.sm{width:auto;margin:0;padding:9px 14px;font-size:14px;box-shadow:3px 3px 0 var(--sh)}
+.brow{display:flex;gap:10px;align-items:center}.brow .grow{flex:1;min-width:0}
+.bgt{display:flex;flex-direction:column;gap:14px}
+.bgt .h{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px;font-weight:800;font-size:14.5px}
+.bgt input{width:110px;padding:7px 9px;font-size:15px;text-align:right}
+.note{font-size:13px;color:var(--mut);font-weight:600;margin-top:6px;line-height:1.45}
+.tag{display:inline-flex;align-items:center;gap:6px;border:2.5px solid var(--line);border-radius:99px;padding:4px 6px 4px 12px;font-weight:700;font-size:13.5px;margin:0 6px 8px 0;background:var(--card)}
+.tag button{border:0;background:var(--soft);color:var(--ink);width:22px;height:22px;border-radius:50%;font-weight:900;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-weight:700;font-size:14px;z-index:20;max-width:90vw;text-align:center}
+.stack>*+*{margin-top:12px}
+@media print{.tabs,.fab{display:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav class="tabs"><div id="tabs"></div></nav>
+<script>
+"use strict";
+var DEFAULT_LANG = "id"; /* "en" or "id": the language a new user starts with */
+var KEY = "pocket_expense_v1";
+var COLORS = ["#e0303a", "#00857a", "#6c4cf1", "#f2a900", "#1d1b3a", "#d6338f", "#2f80ed", "#7a8b00"];
+
+var L = {
+  en: {
+    app_title: "Pocket Expense Tracker", brand2: "Expenses",
+    tab_home: "Home", tab_history: "History", tab_budgets: "Budgets", tab_settings: "Settings",
+    income: "Income", spent: "Spent", balance: "Balance this month", where: "Where it went", recent: "Recent",
+    no_spend_t: "No spending yet", no_spend_d: "Tap the + button to add your first expense.", nothing: "Nothing here yet.",
+    prev: "Previous month", next: "Next month",
+    f_all: "All", f_exp: "Expenses", f_inc: "Income", no_tx: "No transactions", no_tx_d: "Nothing found for this month.",
+    bud_title: "Budgets", limit: "Limit", left: "{0} left", over: "Over by {0}", spent_s: "spent {0}", no_limit: "no limit set",
+    bud_note: "Limits repeat every month. Leave a limit empty to turn it off.", limit_aria: "{0} monthly limit",
+    set_title: "Settings", currency: "Currency", theme: "Theme (Auto follows your phone)", auto: "Auto", light: "Light", dark: "Dark", language: "Language",
+    exp_cats: "Expense categories", inc_cats: "Income categories", remove_aria: "Remove {0}", keep_one: "Keep at least one category.",
+    confirm_remove: 'Remove "{0}"? Past entries keep their label.', new_cat: "New category", add: "Add", cat_exists: "That category exists.",
+    your_data: "Your data", data_note: "Everything is saved only on this device. Export a backup now and then.",
+    exp_json: "Export backup (JSON)", exp_csv: "Export spreadsheet (CSV)", imp: "Import backup", demo: "Load demo data", del_all: "Delete all data",
+    footer: "Pocket Expense Tracker · by annanink · works offline",
+    confirm_del_all: "Delete ALL data on this device? This cannot be undone.", deleted_all: "All data deleted.",
+    imp_confirm: "Replace the data on this device with this backup?", imp_ok: "Backup imported.", imp_bad: "That file is not a valid backup.",
+    file_saved: "File saved to your downloads.", save_fail: "Could not save. Storage may be full or blocked.",
+    demo_confirm: "Add demo entries to your current data?", demo_added: "Demo data added.",
+    add_entry: "Add entry", edit_entry: "Edit entry", expense: "Expense", income_l: "Income", amount: "Amount", category: "Category", date: "Date", note: "Note",
+    optional: "Optional", save_changes: "Save changes", delete_entry: "Delete entry", cancel: "Cancel",
+    err_amount: "Enter an amount greater than 0.", err_date: "Pick a date.", saved: "Saved.", added: "Added.",
+    confirm_delete_entry: "Delete this entry?", deleted: "Deleted.", to_light: "Switch to light mode", to_dark: "Switch to dark mode",
+    csv_head: "Date,Type,Category,Amount,Note", locale: "en-US", lang_name: "English",
+    cur: [["$", "$ US Dollar"], ["€", "€ Euro"], ["£", "£ Pound"], ["C$", "C$ Canadian Dollar"], ["A$", "A$ Australian Dollar"], ["Rp", "Rp Rupiah"], ["₹", "₹ Rupee"], ["¥", "¥ Yen"], ["", "No symbol"]],
+    cats_exp: ["Food", "Groceries", "Transport", "Bills", "Shopping", "Health", "Fun", "Other"], cats_inc: ["Salary", "Freelance", "Gift", "Other"],
+    symbol: "$"
+  },
+  id: {
+    app_title: "Pocket Catatan Keuangan", brand2: "Keuangan",
+    tab_home: "Beranda", tab_history: "Riwayat", tab_budgets: "Anggaran", tab_settings: "Pengaturan",
+    income: "Pemasukan", spent: "Pengeluaran", balance: "Saldo bulan ini", where: "Uang habis ke mana", recent: "Terbaru",
+    no_spend_t: "Belum ada pengeluaran", no_spend_d: "Ketuk tombol + untuk mencatat pengeluaran pertama.", nothing: "Belum ada catatan.",
+    prev: "Bulan sebelumnya", next: "Bulan berikutnya",
+    f_all: "Semua", f_exp: "Pengeluaran", f_inc: "Pemasukan", no_tx: "Belum ada transaksi", no_tx_d: "Tidak ada catatan untuk bulan ini.",
+    bud_title: "Anggaran", limit: "Batas", left: "sisa {0}", over: "Lebih {0}", spent_s: "terpakai {0}", no_limit: "belum ada batas",
+    bud_note: "Batas berlaku setiap bulan. Kosongkan kolom untuk mematikannya.", limit_aria: "Batas bulanan {0}",
+    set_title: "Pengaturan", currency: "Mata uang", theme: "Tema (Otomatis mengikuti HP)", auto: "Otomatis", light: "Terang", dark: "Gelap", language: "Bahasa",
+    exp_cats: "Kategori pengeluaran", inc_cats: "Kategori pemasukan", remove_aria: "Hapus {0}", keep_one: "Sisakan minimal satu kategori.",
+    confirm_remove: 'Hapus "{0}"? Catatan lama tetap memakai nama ini.', new_cat: "Kategori baru", add: "Tambah", cat_exists: "Kategori itu sudah ada.",
+    your_data: "Data kamu", data_note: "Semua data hanya tersimpan di perangkat ini. Buat cadangan secara berkala.",
+    exp_json: "Ekspor cadangan (JSON)", exp_csv: "Ekspor ke spreadsheet (CSV)", imp: "Impor cadangan", demo: "Muat data contoh", del_all: "Hapus semua data",
+    footer: "Pocket Catatan Keuangan · oleh annanink · bisa offline",
+    confirm_del_all: "Hapus SEMUA data di perangkat ini? Tindakan ini tidak bisa dibatalkan.", deleted_all: "Semua data dihapus.",
+    imp_confirm: "Ganti data di perangkat ini dengan cadangan tersebut?", imp_ok: "Cadangan berhasil diimpor.", imp_bad: "File itu bukan cadangan yang valid.",
+    file_saved: "File tersimpan di folder unduhan.", save_fail: "Gagal menyimpan. Penyimpanan mungkin penuh atau diblokir.",
+    demo_confirm: "Tambahkan data contoh ke data kamu sekarang?", demo_added: "Data contoh ditambahkan.",
+    add_entry: "Tambah catatan", edit_entry: "Ubah catatan", expense: "Pengeluaran", income_l: "Pemasukan", amount: "Jumlah", category: "Kategori", date: "Tanggal", note: "Catatan",
+    optional: "Opsional", save_changes: "Simpan perubahan", delete_entry: "Hapus catatan", cancel: "Batal",
+    err_amount: "Isi jumlah lebih dari 0.", err_date: "Pilih tanggal.", saved: "Tersimpan.", added: "Ditambahkan.",
+    confirm_delete_entry: "Hapus catatan ini?", deleted: "Dihapus.", to_light: "Ganti ke mode terang", to_dark: "Ganti ke mode gelap",
+    csv_head: "Tanggal,Jenis,Kategori,Jumlah,Catatan", locale: "id-ID", lang_name: "Bahasa Indonesia",
+    cur: [["Rp", "Rp Rupiah"], ["$", "$ Dolar AS"], ["€", "€ Euro"], ["£", "£ Poundsterling"], ["C$", "C$ Dolar Kanada"], ["A$", "A$ Dolar Australia"], ["₹", "₹ Rupee India"], ["¥", "¥ Yen"], ["", "Tanpa simbol"]],
+    cats_exp: ["Makan", "Belanja Dapur", "Transport", "Tagihan", "Belanja", "Kesehatan", "Hiburan", "Lainnya"], cats_inc: ["Gaji", "Freelance", "Hadiah", "Lainnya"],
+    symbol: "Rp"
+  }
+};
+var DEMO = {
+  en: { rows: [["income", 3200, 0, 1, "Paycheck"], ["income", 180, 1, 9, "Logo project"], ["expense", 1100, 3, 2, "Rent"], ["expense", 86.4, 1, 4, "Weekly shop"], ["expense", 42.5, 0, 5, "Dinner out"], ["expense", 60, 2, 6, "Gas"], ["expense", 129.99, 4, 8, "Winter jacket"], ["expense", 24, 6, 10, "Movie night"], ["expense", 72.15, 1, 12, "Costco run"], ["expense", 55, 5, 14, "Pharmacy"], ["expense", 18.7, 0, 15, "Coffee and lunch"], ["expense", 95, 3, 16, "Phone and internet"]], budgets: { 0: 150, 1: 300, 2: 120, 4: 200, 6: 100 } },
+  id: { rows: [["income", 5200000, 0, 1, "Gaji bulanan"], ["income", 750000, 1, 9, "Proyek logo"], ["expense", 1100000, 3, 2, "Sewa kos"], ["expense", 386000, 1, 4, "Belanja mingguan"], ["expense", 85000, 0, 5, "Makan malam"], ["expense", 120000, 2, 6, "Bensin"], ["expense", 349000, 4, 8, "Jaket"], ["expense", 60000, 6, 10, "Nonton bioskop"], ["expense", 215000, 1, 12, "Belanja pasar"], ["expense", 95000, 5, 14, "Apotek"], ["expense", 42000, 0, 15, "Kopi dan makan siang"], ["expense", 210000, 3, 16, "Pulsa dan internet"]], budgets: { 0: 400000, 1: 800000, 2: 300000, 4: 500000, 6: 250000 } }
+};
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function defFor(lang) {
+  var d = L[lang] || L.en;
+  return { tx: [], budgets: {}, cats: { expense: d.cats_exp.slice(), income: d.cats_inc.slice() }, settings: { symbol: d.symbol, theme: "auto", lang: lang } };
+}
+function load() {
+  var lang = DEFAULT_LANG;
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var o = JSON.parse(raw);
+      if (o.settings && L[o.settings.lang]) lang = o.settings.lang;
+      var d = defFor(lang);
+      if (Array.isArray(o.tx)) d.tx = o.tx;
+      if (o.budgets && typeof o.budgets === "object") d.budgets = o.budgets;
+      if (o.cats && Array.isArray(o.cats.expense) && Array.isArray(o.cats.income)) d.cats = o.cats;
+      if (o.settings) d.settings = Object.assign(d.settings, o.settings);
+      d.settings.lang = lang;
+      return d;
+    }
+  } catch (e) {}
+  return defFor(lang);
+}
+var S = load();
+function lang() { return L[S.settings.lang] ? S.settings.lang : "en"; }
+function t(k) {
+  var s = (L[lang()][k] != null ? L[lang()][k] : L.en[k]) || k;
+  for (var i = 1; i < arguments.length; i++) s = s.replace("{" + (i - 1) + "}", arguments[i]);
+  return s;
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast(t("save_fail")); } }
+
+var view = "home", filter = "all";
+var month = new Date(); month.setDate(1);
+
+/* ---------- helpers ---------- */
+function h(tag, attrs) {
+  var el = document.createElement(tag);
+  attrs = attrs || {};
+  for (var k in attrs) {
+    if (k === "class") el.className = attrs[k];
+    else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), attrs[k]);
+    else if (k === "html") el.innerHTML = attrs[k];
+    else el.setAttribute(k, attrs[k]);
+  }
+  for (var i = 2; i < arguments.length; i++) {
+    var c = arguments[i];
+    if (c == null || c === false) continue;
+    el.appendChild(typeof c === "string" || typeof c === "number" ? document.createTextNode(String(c)) : c);
+  }
+  return el;
+}
+function money(n) {
+  var sym = S.settings.symbol, digits = sym === "Rp" ? 0 : 2;
+  var s = Math.abs(n).toLocaleString(L[lang()].locale, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  return (n < 0 ? "-" : "") + sym + (sym === "Rp" ? "\u00a0" : "") + s;
+}
+function pad(n) { return (n < 10 ? "0" : "") + n; }
+function today() { var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+function ym(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1); }
+function monthLabel() { return month.toLocaleString(L[lang()].locale, { month: "long", year: "numeric" }); }
+function monthTx() { var p = ym(month); return S.tx.filter(function (x) { return x.date.slice(0, 7) === p; }); }
+function colorFor(cat) {
+  var all = S.cats.expense.concat(S.cats.income.filter(function (c) { return S.cats.expense.indexOf(c) < 0; }));
+  var i = all.indexOf(cat); return COLORS[(i < 0 ? 0 : i) % COLORS.length];
+}
+function dateLabel(iso) {
+  var p = iso.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]);
+  return d.toLocaleDateString(L[lang()].locale, { weekday: "short", month: "short", day: "numeric" });
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function toast(msg) {
+  var old = document.querySelector(".toast"); if (old) old.remove();
+  var el = h("div", { class: "toast" }, msg); document.body.appendChild(el);
+  setTimeout(function () { el.remove(); }, 2400);
+}
+function applyTheme() { document.documentElement.setAttribute("data-theme", S.settings.theme); }
+function sums(list) {
+  var i = 0, e = 0; list.forEach(function (x) { if (x.type === "income") i += x.amount; else e += x.amount; });
+  return { inc: i, exp: e, bal: i - e };
+}
+function shiftMonth(n) { month = new Date(month.getFullYear(), month.getMonth() + n, 1); render(); }
+function monthNav() {
+  return h("div", { class: "mnav" },
+    h("button", { class: "ib", "aria-label": t("prev"), onclick: function () { shiftMonth(-1); } }, "‹"),
+    h("b", {}, monthLabel()),
+    h("button", { class: "ib", "aria-label": t("next"), onclick: function () { shiftMonth(1); } }, "›"));
+}
+function txRow(x) {
+  var neg = x.type === "expense";
+  return h("button", { class: "tx", onclick: function () { openTx(x); } },
+    h("div", { class: "dot", style: "background:" + colorFor(x.cat) }, (x.cat || "?").charAt(0).toUpperCase()),
+    h("div", { class: "m" }, h("b", {}, x.cat), h("small", {}, (x.note ? x.note + " · " : "") + dateLabel(x.date))),
+    h("div", { class: "a " + (neg ? "n" : "p") }, (neg ? "-" : "+") + money(x.amount)));
+}
+function byDateDesc(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : (a.id < b.id ? 1 : -1); }
+
+/* ---------- views ---------- */
+function vHome() {
+  var list = monthTx(), s = sums(list);
+  var box = h("div", {});
+  var dark = document.documentElement.getAttribute("data-theme") === "dark" || (S.settings.theme === "auto" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+  box.appendChild(h("div", { class: "top", style: "margin-bottom:6px" }, h("h1", { style: "white-space:nowrap" }, "Pocket ", h("span", {}, t("brand2"))),
+    h("button", { class: "ib", "aria-label": dark ? t("to_light") : t("to_dark"), onclick: function () { S.settings.theme = dark ? "light" : "dark"; save(); applyTheme(); render(); } }, dark ? "☀" : "☾")));
+  box.appendChild(h("div", { style: "margin-bottom:12px" }, monthNav()));
+  box.appendChild(h("div", { class: "sum" },
+    h("div", { class: "card inc" }, h("div", { class: "lab" }, t("income")), h("div", { class: "big" + (S.settings.symbol === "Rp" ? " sm" : "") }, money(s.inc))),
+    h("div", { class: "card exp" }, h("div", { class: "lab" }, t("spent")), h("div", { class: "big" + (S.settings.symbol === "Rp" ? " sm" : "") }, money(s.exp))),
+    h("div", { class: "card bal full" }, h("div", { class: "lab" }, t("balance")), h("div", { class: "big" }, money(s.bal)))));
+  box.appendChild(h("h2", {}, t("where")));
+  var by = {}; list.forEach(function (x) { if (x.type === "expense") by[x.cat] = (by[x.cat] || 0) + x.amount; });
+  var keys = Object.keys(by).sort(function (a, b) { return by[b] - by[a]; });
+  if (!keys.length) box.appendChild(h("div", { class: "card empty" }, h("b", {}, t("no_spend_t")), t("no_spend_d")));
+  else {
+    var bars = h("div", { class: "card bars" });
+    keys.forEach(function (k) {
+      var pct = s.exp ? by[k] / s.exp * 100 : 0;
+      bars.appendChild(h("div", { class: "bar" },
+        h("div", { class: "r" }, h("span", {}, k), h("span", {}, money(by[k]) + " · " + Math.round(pct) + "%")),
+        h("div", { class: "track" }, h("div", { class: "fill", style: "width:" + Math.max(pct, 2) + "%;background:" + colorFor(k) }))));
+    });
+    box.appendChild(bars);
+  }
+  box.appendChild(h("h2", {}, t("recent")));
+  var recent = list.slice().sort(byDateDesc).slice(0, 5);
+  if (!recent.length) box.appendChild(h("div", { class: "card empty" }, t("nothing")));
+  else { var l = h("div", { class: "list" }); recent.forEach(function (x) { l.appendChild(txRow(x)); }); box.appendChild(l); }
+  return box;
+}
+function vHistory() {
+  var box = h("div", {});
+  box.appendChild(h("div", { class: "top" }, h("h1", {}, t("tab_history")), monthNav()));
+  var chips = h("div", { class: "chips" });
+  [["all", t("f_all")], ["expense", t("f_exp")], ["income", t("f_inc")]].forEach(function (f) {
+    chips.appendChild(h("button", { class: "chip" + (filter === f[0] ? " on" : ""), onclick: function () { filter = f[0]; render(); } }, f[1]));
+  });
+  box.appendChild(chips);
+  var list = monthTx().filter(function (x) { return filter === "all" || x.type === filter; }).sort(byDateDesc);
+  if (!list.length) { box.appendChild(h("div", { class: "card empty", style: "margin-top:12px" }, h("b", {}, t("no_tx")), t("no_tx_d"))); return box; }
+  var last = "", wrap = h("div", { class: "list" });
+  list.forEach(function (x) {
+    if (x.date !== last) { wrap.appendChild(h("div", { class: "dg" }, dateLabel(x.date))); last = x.date; }
+    wrap.appendChild(txRow(x));
+  });
+  box.appendChild(wrap);
+  return box;
+}
+function vBudgets() {
+  var box = h("div", {});
+  box.appendChild(h("div", { class: "top" }, h("h1", {}, t("bud_title")), monthNav()));
+  var spent = {}; monthTx().forEach(function (x) { if (x.type === "expense") spent[x.cat] = (spent[x.cat] || 0) + x.amount; });
+  var card = h("div", { class: "card bgt" });
+  S.cats.expense.forEach(function (c) {
+    var lim = +S.budgets[c] || 0, sp = spent[c] || 0, pct = lim ? Math.min(sp / lim * 100, 100) : 0, over = lim && sp > lim;
+    var inp = h("input", { type: "number", inputmode: "decimal", min: "0", step: "any", placeholder: t("limit"), value: lim || "", "aria-label": t("limit_aria", c) });
+    inp.addEventListener("change", function () {
+      var v = parseFloat(inp.value);
+      if (v > 0) S.budgets[c] = v; else delete S.budgets[c];
+      save(); render();
+    });
+    card.appendChild(h("div", {},
+      h("div", { class: "h" }, h("span", {}, c), inp),
+      h("div", { class: "track" }, h("div", { class: "fill", style: "width:" + (lim ? Math.max(pct, 2) : 0) + "%;background:" + (over ? "var(--red)" : "var(--teal)") })),
+      h("div", { class: "note", style: over ? "color:var(--red)" : "" },
+        lim ? (over ? t("over", money(sp - lim)) : t("left", money(lim - sp))) + " · " + t("spent_s", money(sp)) : t("spent_s", money(sp)) + " · " + t("no_limit"))));
+  });
+  box.appendChild(card);
+  box.appendChild(h("div", { class: "note" }, t("bud_note")));
+  return box;
+}
+function switchLang(to) {
+  var from = lang(); if (from === to) return;
+  /* if the categories are still the defaults, translate them (and the entries that use them) */
+  ["expense", "income"].forEach(function (kind) {
+    var a = L[from]["cats_" + (kind === "expense" ? "exp" : "inc")], b = L[to]["cats_" + (kind === "expense" ? "exp" : "inc")];
+    if (JSON.stringify(S.cats[kind]) === JSON.stringify(a)) {
+      S.tx.forEach(function (x) { if (x.type === kind) { var i = a.indexOf(x.cat); if (i >= 0) x.cat = b[i]; } });
+      if (kind === "expense") { var nb = {}; Object.keys(S.budgets).forEach(function (k) { var i = a.indexOf(k); nb[i >= 0 ? b[i] : k] = S.budgets[k]; }); S.budgets = nb; }
+      S.cats[kind] = b.slice();
+    }
+  });
+  if (S.settings.symbol === L[from].symbol && S.tx.length === 0) S.settings.symbol = L[to].symbol;
+  S.settings.lang = to; save(); render();
+}
+function seg(options, current, onpick) {
+  var el = h("div", { class: "seg " + (options.length === 3 ? "three" : ""), style: "margin:0" });
+  options.forEach(function (c) { el.appendChild(h("button", { type: "button", class: current === c[0] ? "on t" : "", onclick: function () { onpick(c[0]); } }, c[1])); });
+  return el;
+}
+function vSettings() {
+  var box = h("div", { class: "stack" });
+  box.appendChild(h("div", { class: "top" }, h("h1", {}, t("set_title"))));
+  var cur = h("select", {});
+  L[lang()].cur.forEach(function (c) {
+    var o = h("option", { value: c[0] }, c[1]); if (S.settings.symbol === c[0]) o.selected = true; cur.appendChild(o);
+  });
+  cur.addEventListener("change", function () { S.settings.symbol = cur.value; save(); render(); });
+  var th = seg([["auto", t("auto")], ["light", t("light")], ["dark", t("dark")]], S.settings.theme, function (v) { S.settings.theme = v; save(); applyTheme(); render(); });
+  var lg = seg([["en", L.en.lang_name], ["id", L.id.lang_name]], lang(), switchLang);
+  box.appendChild(h("div", { class: "card" }, h("label", { style: "margin-top:0" }, t("language")), lg, h("label", {}, t("currency")), cur, h("label", {}, t("theme")), th));
+
+  function catBlock(kind, title) {
+    var c = h("div", { class: "card" }, h("div", { class: "lab", style: "margin-bottom:10px" }, title));
+    S.cats[kind].forEach(function (name) {
+      c.appendChild(h("span", { class: "tag" }, name, h("button", {
+        "aria-label": t("remove_aria", name),
+        onclick: function () {
+          if (S.cats[kind].length <= 1) { toast(t("keep_one")); return; }
+          if (confirm(t("confirm_remove", name))) { S.cats[kind] = S.cats[kind].filter(function (x) { return x !== name; }); if (kind === "expense") delete S.budgets[name]; save(); render(); }
+        }
+      }, "×")));
+    });
+    var inp = h("input", { type: "text", placeholder: t("new_cat"), maxlength: "20" });
+    var add = h("button", { class: "btn sm", onclick: function () {
+      var v = inp.value.trim(); if (!v) return;
+      if (S.cats[kind].some(function (x) { return x.toLowerCase() === v.toLowerCase(); })) { toast(t("cat_exists")); return; }
+      S.cats[kind].push(v); save(); render();
+    } }, t("add"));
+    c.appendChild(h("div", { class: "brow", style: "margin-top:6px" }, h("div", { class: "grow" }, inp), add));
+    return c;
+  }
+  box.appendChild(catBlock("expense", t("exp_cats")));
+  box.appendChild(catBlock("income", t("inc_cats")));
+  box.appendChild(h("div", { class: "card" }, h("div", { class: "lab" }, t("your_data")),
+    h("div", { class: "note", style: "margin:6px 0 0" }, t("data_note")),
+    h("button", { class: "btn sec", onclick: exportJSON }, t("exp_json")),
+    h("button", { class: "btn sec", onclick: exportCSV }, t("exp_csv")),
+    h("button", { class: "btn sec", onclick: function () { fileIn.click(); } }, t("imp")),
+    h("button", { class: "btn sec", onclick: loadDemo }, t("demo")),
+    h("button", { class: "btn del", onclick: function () { if (confirm(t("confirm_del_all"))) { S = defFor(lang()); save(); applyTheme(); toast(t("deleted_all")); render(); } } }, t("del_all"))));
+  box.appendChild(h("div", { class: "note", style: "text-align:center" }, t("footer")));
+  return box;
+}
+var fileIn = h("input", { type: "file", accept: "application/json,.json", style: "display:none" });
+fileIn.addEventListener("change", function () {
+  var f = fileIn.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function () {
+    try {
+      var o = JSON.parse(r.result);
+      if (!o || !Array.isArray(o.tx)) throw 0;
+      if (!confirm(t("imp_confirm"))) return;
+      var lg = o.settings && L[o.settings.lang] ? o.settings.lang : lang();
+      var d = defFor(lg);
+      d.tx = o.tx.filter(function (x) { return x && typeof x.amount === "number" && /^\d{4}-\d{2}-\d{2}$/.test(x.date) && (x.type === "income" || x.type === "expense"); })
+        .map(function (x) { return { id: String(x.id || uid()), type: x.type, amount: x.amount, cat: String(x.cat || "Other"), date: x.date, note: String(x.note || "") }; });
+      if (o.budgets) d.budgets = o.budgets;
+      if (o.cats && Array.isArray(o.cats.expense) && Array.isArray(o.cats.income)) d.cats = o.cats;
+      if (o.settings) d.settings = Object.assign(d.settings, o.settings);
+      d.settings.lang = lg;
+      S = d; save(); applyTheme(); toast(t("imp_ok")); render();
+    } catch (e) { toast(t("imp_bad")); }
+    fileIn.value = "";
+  };
+  r.readAsText(f);
+});
+function download(name, text, type) {
+  var a = h("a", { href: URL.createObjectURL(new Blob([text], { type: type })), download: name });
+  document.body.appendChild(a); a.click(); a.remove();
+  toast(t("file_saved"));
+}
+function exportJSON() { download("backup-" + today() + ".json", JSON.stringify(S, null, 2), "application/json"); }
+function exportCSV() {
+  function q(v) { v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
+  var rows = [t("csv_head")];
+  S.tx.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }).forEach(function (x) {
+    rows.push([x.date, x.type === "income" ? t("income_l") : t("expense"), q(x.cat), x.amount.toFixed(2), q(x.note || "")].join(","));
+  });
+  download("transactions-" + today() + ".csv", rows.join("\n"), "text/csv");
+}
+function loadDemo() {
+  if (S.tx.length && !confirm(t("demo_confirm"))) return;
+  var now = new Date(), y = now.getFullYear(), m = now.getMonth(), D = DEMO[lang()];
+  function d(day) { return y + "-" + pad(m + 1) + "-" + pad(Math.min(day, 28)); }
+  D.rows.forEach(function (r) {
+    var list = S.cats[r[0]]; S.tx.push({ id: uid(), type: r[0], amount: r[1], cat: list[r[2]] || list[0], date: d(r[3]), note: r[4] });
+  });
+  var nb = {}; Object.keys(D.budgets).forEach(function (i) { nb[S.cats.expense[i] || S.cats.expense[0]] = D.budgets[i]; });
+  S.budgets = Object.assign(nb, S.budgets);
+  save(); toast(t("demo_added")); render();
+}
+
+/* ---------- add / edit sheet ---------- */
+function openTx(x) {
+  var edit = !!x, type = edit ? x.type : "expense";
+  var ov = h("div", { class: "ov", onclick: function (e) { if (e.target === ov) ov.remove(); } });
+  var sheet = h("div", { class: "sheet", role: "dialog", "aria-modal": "true" });
+  var amt = h("input", { class: "amt", type: "number", inputmode: "decimal", step: "any", min: "0", placeholder: S.settings.symbol === "Rp" ? "0" : "0.00", value: edit ? x.amount : "" });
+  var cat = h("select", {});
+  var date = h("input", { type: "date", value: edit ? x.date : today() });
+  var note = h("input", { type: "text", maxlength: "60", placeholder: t("optional"), value: edit ? x.note || "" : "" });
+  var segE = h("button", { type: "button" }, t("expense")), segI = h("button", { type: "button" }, t("income_l"));
+  function fillCats() {
+    cat.innerHTML = "";
+    var list = S.cats[type].slice();
+    if (edit && x.type === type && list.indexOf(x.cat) < 0) list.unshift(x.cat);
+    list.forEach(function (c) { var o = h("option", { value: c }, c); if (edit && x.type === type && x.cat === c) o.selected = true; cat.appendChild(o); });
+    segE.className = type === "expense" ? "on e" : ""; segI.className = type === "income" ? "on i" : "";
+  }
+  segE.onclick = function () { type = "expense"; fillCats(); };
+  segI.onclick = function () { type = "income"; fillCats(); };
+  fillCats();
+  sheet.appendChild(h("h3", {}, edit ? t("edit_entry") : t("add_entry")));
+  sheet.appendChild(h("div", { class: "seg" }, segE, segI));
+  sheet.appendChild(h("label", { style: "margin-top:0" }, t("amount"))); sheet.appendChild(amt);
+  sheet.appendChild(h("div", { class: "row2" }, h("div", {}, h("label", {}, t("category")), cat), h("div", {}, h("label", {}, t("date")), date)));
+  sheet.appendChild(h("label", {}, t("note"))); sheet.appendChild(note);
+  sheet.appendChild(h("button", { class: "btn", onclick: function () {
+    var v = parseFloat(amt.value);
+    if (!(v > 0)) { toast(t("err_amount")); amt.focus(); return; }
+    if (!date.value) { toast(t("err_date")); return; }
+    v = Math.round(v * 100) / 100;
+    if (edit) { x.type = type; x.amount = v; x.cat = cat.value; x.date = date.value; x.note = note.value.trim(); }
+    else S.tx.push({ id: uid(), type: type, amount: v, cat: cat.value, date: date.value, note: note.value.trim() });
+    var p = date.value.split("-"); month = new Date(+p[0], +p[1] - 1, 1);
+    save(); ov.remove(); toast(edit ? t("saved") : t("added")); render();
+  } }, edit ? t("save_changes") : t("add_entry")));
+  if (edit) sheet.appendChild(h("button", { class: "btn del", onclick: function () {
+    if (confirm(t("confirm_delete_entry"))) { S.tx = S.tx.filter(function (z) { return z.id !== x.id; }); save(); ov.remove(); toast(t("deleted")); render(); }
+  } }, t("delete_entry")));
+  sheet.appendChild(h("button", { class: "btn sec", onclick: function () { ov.remove(); } }, t("cancel")));
+  ov.appendChild(sheet); document.body.appendChild(ov);
+  if (!edit) setTimeout(function () { amt.focus(); }, 60);
+}
+
+/* ---------- shell ---------- */
+var ICONS = {
+  home: '<svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
+  history: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  budgets: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12V3"/><path d="M12 12l6.4 6.4"/></svg>',
+  settings: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>'
+};
+function tabBtn(id) {
+  var label = t("tab_" + id);
+  var b = h("button", { class: "tab" + (view === id ? " on" : ""), "aria-label": label, onclick: function () { view = id; render(); window.scrollTo(0, 0); }, html: ICONS[id] });
+  b.appendChild(h("span", {}, label)); return b;
+}
+function render() {
+  document.documentElement.lang = lang(); document.title = t("app_title");
+  var app = document.getElementById("app"); app.innerHTML = "";
+  app.appendChild(view === "home" ? vHome() : view === "history" ? vHistory() : view === "budgets" ? vBudgets() : vSettings());
+  var tabs = document.getElementById("tabs"); tabs.innerHTML = "";
+  tabs.appendChild(tabBtn("home")); tabs.appendChild(tabBtn("history"));
+  tabs.appendChild(h("button", { class: "fab", "aria-label": t("add_entry"), onclick: function () { openTx(); } }, "+"));
+  tabs.appendChild(tabBtn("budgets")); tabs.appendChild(tabBtn("settings"));
+}
+document.body.appendChild(fileIn);
+applyTheme(); render();
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+}
+</script>
+</body>
+</html>

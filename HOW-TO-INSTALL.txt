@@ -1,0 +1,43 @@
+POCKET CATATAN KEUANGAN - PANDUAN PEMASANGAN
+=============================================
+Bisa dipakai offline. Datamu tersimpan di perangkatmu sendiri. Tanpa akun, iklan, atau langganan.
+
+BUKA APLIKASINYA (cara mudah, sekitar 1 menit)
+Link aplikasimu:
+   https://3annanink.github.io/pocket-keuangan/
+
+1. Buka link di HP saat internet menyala.
+   - Android: pakai Chrome
+   - iPhone: pakai Safari
+2. Pasang di layar utama:
+   - Android (Chrome): Menu (titik tiga) > Instal aplikasi / Tambahkan ke layar utama
+   - iPhone (Safari): tombol Bagikan > Tambah ke Layar Utama
+3. Buka sekali saat ada internet. Setelah itu aplikasi jalan tanpa internet, termasuk mode pesawat.
+
+Di komputer: cukup buka link di Chrome atau Edge. Bisa juga dipasang lewat ikon instal
+di kolom alamat.
+
+DATAMU (mohon dibaca)
+- Semua catatan hanya tersimpan di perangkatmu, di dalam browser. TIDAK disimpan di link
+  dan tidak dikirim ke server mana pun.
+- HP atau browser yang berbeda punya data sendiri-sendiri.
+- Kalau kamu menghapus data situs di browser, catatanmu bisa hilang.
+- CADANGKAN secara berkala: Pengaturan > Ekspor cadangan (JSON). Untuk memulihkan atau
+  pindah HP: Pengaturan > Impor cadangan.
+
+CARA PAKAI
+- Ketuk + untuk mencatat pengeluaran atau pemasukan. Ketuk catatan mana pun untuk mengubah atau menghapus.
+- Tab Anggaran: atur batas bulanan untuk tiap kategori.
+- Pengaturan: pilih bahasa (Indonesia / English), mata uang, tema, dan kategori.
+  "Muat data contoh" menampilkan contoh catatan; "Hapus semua data" mengosongkan semuanya.
+
+FILE ZIP INI (salinan cadangan / lanjutan)
+ZIP ini berisi seluruh file aplikasi. Simpan sebagai cadangan kalau suatu saat link tidak bisa dibuka.
+Di komputer, ekstrak lalu klik dua kali index.html untuk memakainya tanpa link
+(cara ini kurang cocok untuk iPhone). Kamu juga bisa mengunggah file ke hosting gratis milikmu sendiri,
+misalnya Netlify (app.netlify.com/drop) atau GitHub Pages.
+Simpan kelima file aplikasi di satu folder yang sama.
+
+Ada kendala? Chat aku, aku bantu.
+Untuk pemakaian pribadi. Mohon tidak menjual ulang atau membagikan file maupun link-nya.
+Terima kasih sudah membeli! - annanink
