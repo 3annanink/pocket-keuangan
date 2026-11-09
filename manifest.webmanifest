@@ -1,14 +1,19 @@
 {
+  "id": "pocket-keuangan-app-v2",
   "name": "Pocket Catatan Keuangan",
-  "id": "pocket-keuangan",
   "short_name": "Keuangan",
   "description": "Aplikasi catatan keuangan sederhana dan privat yang bisa dipakai offline.",
-  "start_url": "./index.html",
+  "lang": "id",
+  "start_url": "./index.html?source=pwa",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#fff4dc",
   "theme_color": "#fff4dc",
+  "categories": [
+    "finance",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "icon-192.png",
@@ -23,7 +28,7 @@
       "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

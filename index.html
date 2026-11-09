@@ -6,7 +6,7 @@
 <title>Pocket Expense Tracker</title>
 <meta name="description" content="A simple, private expense tracker that works offline. Your data stays on your device.">
 <meta name="theme-color" content="#fff4dc">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest?v=2">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -88,7 +88,8 @@ input.amt{font-size:28px;font-weight:900}
 <nav class="tabs"><div id="tabs"></div></nav>
 <script>
 "use strict";
-var DEFAULT_LANG = "id"; /* "en" or "id": the language a new user starts with */
+var DEFAULT_LANG = "id"; /* "en" or "id": the language of this build */
+var LANG_SWITCH = false; /* true = show English/Indonesian buttons in Settings */
 var KEY = "pocket_expense_v1";
 var COLORS = ["#e0303a", "#00857a", "#6c4cf1", "#f2a900", "#1d1b3a", "#d6338f", "#2f80ed", "#7a8b00"];
 
@@ -165,7 +166,7 @@ function load() {
     var raw = localStorage.getItem(KEY);
     if (raw) {
       var o = JSON.parse(raw);
-      if (o.settings && L[o.settings.lang]) lang = o.settings.lang;
+      if (LANG_SWITCH && o.settings && L[o.settings.lang]) lang = o.settings.lang;
       var d = defFor(lang);
       if (Array.isArray(o.tx)) d.tx = o.tx;
       if (o.budgets && typeof o.budgets === "object") d.budgets = o.budgets;
@@ -353,7 +354,10 @@ function vSettings() {
   cur.addEventListener("change", function () { S.settings.symbol = cur.value; save(); render(); });
   var th = seg([["auto", t("auto")], ["light", t("light")], ["dark", t("dark")]], S.settings.theme, function (v) { S.settings.theme = v; save(); applyTheme(); render(); });
   var lg = seg([["en", L.en.lang_name], ["id", L.id.lang_name]], lang(), switchLang);
-  box.appendChild(h("div", { class: "card" }, h("label", { style: "margin-top:0" }, t("language")), lg, h("label", {}, t("currency")), cur, h("label", {}, t("theme")), th));
+  var first = LANG_SWITCH ? [h("label", { style: "margin-top:0" }, t("language")), lg, h("label", {}, t("currency"))] : [h("label", { style: "margin-top:0" }, t("currency"))];
+  var setCard = h("div", { class: "card" });
+  first.concat([cur, h("label", {}, t("theme")), th]).forEach(function (n) { setCard.appendChild(n); });
+  box.appendChild(setCard);
 
   function catBlock(kind, title) {
     var c = h("div", { class: "card" }, h("div", { class: "lab", style: "margin-bottom:10px" }, title));
@@ -396,7 +400,7 @@ fileIn.addEventListener("change", function () {
       var o = JSON.parse(r.result);
       if (!o || !Array.isArray(o.tx)) throw 0;
       if (!confirm(t("imp_confirm"))) return;
-      var lg = o.settings && L[o.settings.lang] ? o.settings.lang : lang();
+      var lg = LANG_SWITCH && o.settings && L[o.settings.lang] ? o.settings.lang : lang();
       var d = defFor(lg);
       d.tx = o.tx.filter(function (x) { return x && typeof x.amount === "number" && /^\d{4}-\d{2}-\d{2}$/.test(x.date) && (x.type === "income" || x.type === "expense"); })
         .map(function (x) { return { id: String(x.id || uid()), type: x.type, amount: x.amount, cat: String(x.cat || "Other"), date: x.date, note: String(x.note || "") }; });
