@@ -1,5 +1,6 @@
 {
   "name": "Pocket Catatan Keuangan",
+  "id": "pocket-keuangan",
   "short_name": "Keuangan",
   "description": "Aplikasi catatan keuangan sederhana dan privat yang bisa dipakai offline.",
   "start_url": "./index.html",
